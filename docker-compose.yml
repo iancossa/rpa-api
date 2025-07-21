@@ -1,34 +1,54 @@
-version: '3.8'
+
 
 services:
   auth-service:
-    build: ./auth-service
+    build:
+      context: ./auth-service
     container_name: auth-service
     ports:
       - "5000:5000"
     environment:
       - PORT=5000
+    volumes:
+      - ./auth-service:/app
+    working_dir: /app
+    command: npm start
 
   user-service:
-    build: ./user-service
+    build:
+      context: ./user-service
     container_name: user-service
     ports:
       - "5001:5000"
     environment:
       - PORT=5000
+    volumes:
+      - ./user-service:/app
+    working_dir: /app
+    command: npm start
 
   task-service:
-    build: ./task-service
+    build:
+      context: ./task-service
     container_name: task-service
     ports:
       - "5002:5000"
     environment:
       - PORT=5000
+    volumes:
+      - ./task-service:/app
+    working_dir: /app
+    command: npm start
 
   automation-service:
-    build: ./automation-service
+    build:
+      context: ./automation-service
     container_name: automation-service
     ports:
       - "5003:5000"
     environment:
       - PORT=5000
+    volumes:
+      - ./automation-service:/app
+    working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 5000
