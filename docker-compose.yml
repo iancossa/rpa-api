@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "5001:5000"
+    environment:
+      - PORT=5000
+
+  task-service:
+    build: ./task-service
+    container_name: task-service
+    ports:
+      - "5002:5000"
+    environment:
+      - PORT=5000
+
+  automation-service:
+    build: ./automation-service
+    container_name: automation-service
+    ports:
+      - "5003:5000"
+    environment:
+      - PORT=5000
