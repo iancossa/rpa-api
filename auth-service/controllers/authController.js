@@ -1,4 +1,5 @@
 const bycrpt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 //const User = require('../models/User'); // Assuming you have a User model
 
 //Post/signup
@@ -24,4 +25,27 @@ exports.signup = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 
+};
+
+//Post/login:Valdate user credentials and generate JWT token
+//POST /login
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        //Check if user exists
+        const user = await User.findOne({ email }); // Assuming you have a User model
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+        //Validate password
+        const isPasswordValid = await bycrpt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+        //Generate JWT token
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ token });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
 };
