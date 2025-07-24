@@ -11,8 +11,6 @@ router.post('/login', login);
 const authMiddleware = require('../middleware/authMiddleware');
 
 
-router.get('/profile',authMiddleware,(req,res)=>{
-    res.json({user: req.user})
-})
+
 
 module.exports = router;
