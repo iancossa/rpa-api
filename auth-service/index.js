@@ -2,6 +2,9 @@ const express = require('express');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoute'); // ⬅️ import your routes
 const mongoose = require('mongoose');
+const adminRoutes = require('./routes/adminRoute'); 
+
+
 
 // Load environment variables from .env file
 dotenv.config();
@@ -11,6 +14,8 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
 
+
+app.use('/admin', adminRoutes); // ⬅️ mount admin routes
 
 // Create an Express application
 const app = express();
