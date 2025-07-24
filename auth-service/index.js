@@ -14,11 +14,11 @@ mongoose.connect(process.env.MONGO_URI, {
 }).then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
 
-
-app.use('/admin', adminRoutes); // ⬅️ mount admin routes
-
 // Create an Express application
 const app = express();
+app.use('/admin', adminRoutes); // ⬅️ mount admin routes
+
+
 
 // Middleware to parse JSON
 app.use(express.json()); // ⬅️ important for POST body parsing

@@ -1,8 +1,11 @@
 const express = require('express');
-const route=    express.Router();
+const route= express.Router();
 const User  = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
+const router = require('./authRoute');
+
+
 
 //PATCH /admin/assign-role
 
@@ -18,3 +21,5 @@ route.patch('/assign-role', authMiddleware, roleMiddleware(['admin']), async (re
     }
 
 });
+
+module.exports = route;
