@@ -2,6 +2,7 @@ const express = require('express');
 const {signup, login} = require('../controllers/authController');
 
 const router = express.Router();
+
 // POST /signup
 router.post('/signup', signup);
 // POST /login  
@@ -43,6 +44,7 @@ router.post('/login', async (req, res) => {
 
 //protect routes with auth middleware
 const authMiddleware = require('../middleware/authMiddleware');
+const { verify } = require('jsonwebtoken');
 
 router.get('/verify-email', async (req, res) => {
   const token = req.query.token;
