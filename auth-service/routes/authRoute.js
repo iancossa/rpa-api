@@ -67,7 +67,7 @@ router.get('/verify-email', async (req, res) => {
 
 /**
  * @swagger
- * /auth/register:
+ * /signup:
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
@@ -91,6 +91,36 @@ router.get('/verify-email', async (req, res) => {
  *       400:
  *         description: Bad request
  */
+
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login with email and password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       400:
+ *         description: Invalid email or password
+ *       403:
+ *         description: Email not verified
+ */
+
 
 
 

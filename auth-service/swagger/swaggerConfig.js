@@ -9,7 +9,7 @@ const options = {
     },
     servers: [{ url: "http://localhost:5000" }],
   },
-  apis: [__dirname + "/routes/*.js"],
+  apis: [__dirname + '/../routes/*.js'], // <- Use this relative path
 };
 
 const swaggerSpec = swaggerJSDoc(options);
