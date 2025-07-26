@@ -3,7 +3,8 @@ const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoute'); // ⬅️ import your routes
 const mongoose = require('mongoose');
 const adminRoutes = require('./routes/adminRoute'); 
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger/swaggerConfig'); // ⬅️ import Swagger config
 
 
 // Load environment variables from .env file
@@ -17,6 +18,15 @@ mongoose.connect(process.env.MONGO_URI, {
 // Create an Express application
 const app = express();
 app.use('/admin', adminRoutes); // ⬅️ mount admin routes
+
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
+
+//Swagger route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // ⬅️ setup Swagger UI
 
 
 
@@ -34,4 +44,5 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Swagger UI is available at http://localhost:${PORT}/api-docs`);
 });
