@@ -19,7 +19,13 @@ async function sendVerificationEmail(to, token) {
     from: `"Auth Service" <${process.env.EMAIL_USER}>`,
     to,
     subject: 'Verify your email',
-    html: `<p>Click <a href="${url}">here</a> to verify your email.</p>`,
+     html: `
+    <p>Hello,</p>
+    <p>Thank you for signing up. Please confirm your email address by clicking the link below:</p>
+    <p><a href="${url}">Verify Email</a></p>
+    <p>If you did not create this account, please ignore this message.</p>
+    <p>– The Auth Service Team</p>
+  `,
   });
 }
 
