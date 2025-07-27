@@ -1,22 +1,47 @@
 const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
 
-const sendVerificationEmail = async (email, token) => {
-  const url = `${process.env.BASE_URL}/auth/verify-email?token=${token}`;
+dotenv.config();
+const transporter = nodemailer.createTransport({
+  host: process.env.MAIL_HOST,
+  port: process.env.MAIL_PORT,
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS
+  }
+});
 
-  const transporter = nodemailer.createTransport({
-    service: 'Gmail', 
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+
+async function sendVerificationEmail(to, token) {
+  const url = `http://localhost:5000/verify-email?token=${token}`;
 
   await transporter.sendMail({
-    from: `"RPA Platform" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: 'Email Verification',
-    html: `<p>Click <a href="${url}">here</a> to verify your email. Link expires in 30 minutes.</p>`,
+    from: `"Auth Service" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: 'Verify your email',
+    html: `<p>Click <a href="${url}">here</a> to verify your email.</p>`,
   });
-};
+}
 
 module.exports = sendVerificationEmail;
+
+
+/**
+ * @swagger
+ * /verify-email:
+ *   get:
+ *     summary: Verify a user's email using a token
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Email verification token
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired token
+ */

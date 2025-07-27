@@ -8,7 +8,7 @@ const swaggerSpec = require('./swagger/swaggerConfig'); // ⬅️ import Swagger
 
 
 // Load environment variables from .env file
-dotenv.config();
+dotenv.config({ path: __dirname + '/../.env' }); 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -34,7 +34,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // ⬅️ s
 app.use(express.json()); // ⬅️ important for POST body parsing
 
 // Mount routes
-app.use('/', authRoutes); // ⬅️ now /signup and /login will work
+app.use('/auth', authRoutes); // ⬅️ now /signup and /login will work
 
 // Health check
 app.get('/', (req, res) => {

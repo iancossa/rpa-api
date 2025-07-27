@@ -7,6 +7,7 @@ const router = require('./authRoute');
 
 
 
+
 //PATCH /admin/assign-role
 
 route.patch('/assign-role', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
@@ -23,3 +24,58 @@ route.patch('/assign-role', authMiddleware, roleMiddleware(['admin']), async (re
 });
 
 module.exports = route;
+
+/**
+ * @swagger
+ * /admin/assign-role:
+ *   post:
+ *     summary: Assign a role to a user
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - role
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [admin, user, viewer]
+ *     responses:
+ *       200:
+ *         description: Role assigned successfully
+ *       400:
+ *         description: Invalid request
+ *       403:
+ *         description: Unauthorized
+ */
+
+
+/**
+ * @swagger
+ * /admin/all-users:
+ *   get:
+ *     summary: Get all registered users
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *       403:
+ *         description: Unauthorized
+ */
