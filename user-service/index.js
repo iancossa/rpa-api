@@ -17,6 +17,7 @@ app.use(express.json());
 
 // Import routes
 const userRoutes = require('./routes/userRoutes');
+//app.use('/api/users', userRoutes);
 
 // Sample route
 app.get('/', (req, res) => {

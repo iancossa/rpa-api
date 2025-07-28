@@ -30,7 +30,7 @@ exports.signup = async (req, res) => {
     const emailToken = generateEmailToken(newUser);
 
     // 5. Send email
-    await sendVerificationEmail(newUser.email, emailToken);
+    await sendVerificationEmail(newUser, emailToken);
 
     // 6. Respond
     res.status(201).json({ message: 'User registered. Please verify your email.' });
@@ -40,6 +40,7 @@ exports.signup = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 exports.login = async (req, res) => {
   try {
@@ -63,5 +64,35 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ message: 'Verification token missing' });
+    }
+
+    // Verify and decode the token
+    const decoded = jwt.verify(token, process.env.EMAIL_SECRET);
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.verified) {
+      return res.status(400).json({ message: 'User already verified' });
+    }
+
+    user.verified = true;
+    await user.save();
+
+    res.status(200).send('<h2>Email verified successfully. You can now login.</h2>');
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(400).send('<h2>Invalid or expired verification link</h2>');
   }
 };
