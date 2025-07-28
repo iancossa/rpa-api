@@ -15,6 +15,9 @@ const app = express();
 // Middleware
 app.use(express.json());
 
+// Import routes
+const userRoutes = require('./routes/userRoutes');
+
 // Sample route
 app.get('/', (req, res) => {
   res.send('User Service Running ✅');
