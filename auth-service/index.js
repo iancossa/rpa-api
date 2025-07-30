@@ -17,6 +17,12 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Create an Express application
 const app = express();
+
+// Middleware to parse JSON (MUST be before routes)
+app.use(express.json()); // ⬅️ important for POST body parsing
+
+// Mount routes
+app.use('/auth', authRoutes); // ⬅️ now /signup and /login will work
 app.use('/admin', adminRoutes); // ⬅️ mount admin routes
 
 app.get("/swagger.json", (req, res) => {
@@ -24,17 +30,8 @@ app.get("/swagger.json", (req, res) => {
   res.send(swaggerSpec);
 });
 
-
 //Swagger route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // ⬅️ setup Swagger UI
-
-
-
-// Middleware to parse JSON
-app.use(express.json()); // ⬅️ important for POST body parsing
-
-// Mount routes
-app.use('/auth', authRoutes); // ⬅️ now /signup and /login will work
 
 // Health check
 app.get('/', (req, res) => {
