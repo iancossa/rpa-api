@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from routes import automation
 
 app = FastAPI()
-
+app.include_router(automation.router)
 class TaskRequest(BaseModel):
     task_name: str
     params: dict
 
+#health check
 @app.get("/")
 def read_root():
     return {"message": "Automation service is up!"}
