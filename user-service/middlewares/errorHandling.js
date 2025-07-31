@@ -12,3 +12,4 @@ const errorHandler = (err, req, res, next) => {
 };
 
 module.exports = errorHandler;
+//week 3 done
