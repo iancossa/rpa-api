@@ -24,6 +24,10 @@ app.get('/', (req, res) => {
   res.send('User Service Running ✅');
 });
 
+// Error handling middleware (must be last)
+const errorHandler = require('./middlewares/errorHandling');
+app.use(errorHandler);
+
 // Start server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
