@@ -2,7 +2,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const sendVerificationEmail = require('../utils/emailSender');
-const generateEmailToken = require('../utils/generateEmail'); // make sure file name matches this
+const generateEmailToken = require('../utils/generateEmail');
+const { notifyUserRegistration } = require('../utils/automationService');
 
 exports.signup = async (req, res) => {
   try {
@@ -32,7 +33,14 @@ exports.signup = async (req, res) => {
     // 5. Send email
     await sendVerificationEmail(newUser, emailToken);
 
-    // 6. Respond
+    // 6. Notify automation service
+    await notifyUserRegistration({
+      id: newUser._id,
+      email: newUser.email,
+      username: newUser.username
+    });
+
+    // 7. Respond
     res.status(201).json({ message: 'User registered. Please verify your email.' });
 
   } catch (error) {
