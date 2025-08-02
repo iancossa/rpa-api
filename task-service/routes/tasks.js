@@ -1,9 +1,10 @@
 const express = require('express');
 const Task = require('../models/Task');
+const { checkRole } = require('../middleware/auth');
 const router = express.Router();
 
 // POST - Create task
-router.post('/', async (req, res) => {
+router.post('/', checkRole(['admin', 'manager']), async (req, res) => {
   try {
     const task = new Task(req.body);
     await task.save();
