@@ -24,6 +24,17 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET - Tasks assigned to user
+router.get('/my-tasks', async (req, res) => {
+  try {
+    const userId = req.headers['user-id'];
+    const tasks = await Task.find({ assignedTo: userId });
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET - Task by ID
 router.get('/:id', async (req, res) => {
   try {
