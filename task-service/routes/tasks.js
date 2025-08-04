@@ -2,6 +2,7 @@ const express = require('express');
 const Task = require('../models/Task');
 const { checkRole } = require('../middleware/auth');
 const { verifyToken } = require('../middleware/jwt');
+const sendToQueue = require('../mq/publisher');
 const router = express.Router();
 
 // POST - Create task
@@ -9,6 +10,15 @@ router.post('/', checkRole(['admin', 'manager']), async (req, res) => {
   try {
     const task = new Task(req.body);
     await task.save();
+    
+    // Send notification to queue
+    await sendToQueue({
+      type: 'TASK_ASSIGNED',
+      to: task.assignedTo,
+      title: task.title,
+      timestamp: Date.now()
+    });
+    
     res.status(201).json(task);
   } catch (error) {
     res.status(400).json({ error: error.message });
