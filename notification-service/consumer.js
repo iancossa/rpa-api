@@ -43,12 +43,12 @@ async function startConsumer() {
 }
 
 async function processMessage(data) {
-  switch (data.type) {
-    case 'TASK_ASSIGNED':
+  switch (data.action) {
+    case 'assign-task':
       await handleTaskAssigned(data);
       break;
     default:
-      throw new Error(`Unknown message type: ${data.type}`);
+      throw new Error(`Unknown action: ${data.action}`);
   }
 }
 
@@ -76,7 +76,8 @@ async function handleTaskAssigned(data) {
     throw new Error('Notification service temporarily unavailable');
   }
   
-  console.log(`📧 Sending notification to ${data.to}: Task "${data.title}" has been assigned`);
+  console.log(`📧 ${data.message}`);
+  console.log(`📋 Task ID: ${data.data.taskId}`);
   // Add email/SMS/push notification logic here
 }
 

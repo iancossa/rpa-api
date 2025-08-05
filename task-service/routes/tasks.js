@@ -13,10 +13,16 @@ router.post('/', checkRole(['admin', 'manager']), async (req, res) => {
     
     // Send notification to queue
     await sendToQueue({
-      type: 'TASK_ASSIGNED',
-      to: task.assignedTo,
-      title: task.title,
-      timestamp: Date.now()
+      service: 'task-service',
+      action: 'assign-task',
+      level: 'info',
+      message: `Task "${task.title}" assigned to ${task.assignedTo}`,
+      timestamp: new Date().toISOString(),
+      data: {
+        taskId: task._id,
+        title: task.title,
+        assignedTo: task.assignedTo
+      }
     });
     
     res.status(201).json(task);
