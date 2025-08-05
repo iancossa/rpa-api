@@ -3,6 +3,7 @@ const Task = require('../models/Task');
 const { checkRole } = require('../middleware/auth');
 const { verifyToken } = require('../middleware/jwt');
 const sendToQueue = require('../mq/publisher');
+const { sendLog } = require('../mq/loggerPublisher');
 const router = express.Router();
 
 // POST - Create task
@@ -25,8 +26,16 @@ router.post('/', checkRole(['admin', 'manager']), async (req, res) => {
       }
     });
     
+    // Log task creation
+    await sendLog('info', 'Task created successfully', {
+      taskId: task._id,
+      title: task.title,
+      assignedTo: task.assignedTo
+    });
+    
     res.status(201).json(task);
   } catch (error) {
+    await sendLog('error', 'Task creation failed', { error: error.message });
     res.status(400).json({ error: error.message });
   }
 });
