@@ -1,9 +1,15 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from routes import automation
+import threading
+from consumer import start_consumer
 
 app = FastAPI()
 app.include_router(automation.router)
+
+# Start RabbitMQ consumer in background thread
+consumer_thread = threading.Thread(target=start_consumer, daemon=True)
+consumer_thread.start()
 class TaskRequest(BaseModel):
     task_name: str
     params: dict
