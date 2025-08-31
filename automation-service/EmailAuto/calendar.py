@@ -1,7 +1,8 @@
 #Calendar integration for scheduling meetings  via the Google Calendar API
 
 import os
-from datetime import datetime, timedelta
+import logging
+from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 import google.auth
@@ -11,6 +12,22 @@ from googleapiclient.errors import HttpError
 # Load environment variables
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
+# Calendar service singleton
+_calendar_service = None
+
+def get_calendar_service():
+    global _calendar_service
+    if _calendar_service is None:
+        try:
+            creds, _ = google.auth.default()
+            _calendar_service = build("calendar", "v3", credentials=creds)
+        except Exception as e:
+            logger.error(f"Failed to authenticate with Google Calendar API: {e}")
+            raise
+    return _calendar_service
+
 
 def create_meeting_invite(
     summary: str,
@@ -18,7 +35,7 @@ def create_meeting_invite(
     start_time: datetime,
     end_time: datetime,
     attendees: list[str],
-    timezone: str = "UTC",
+    timezone_str: str = "UTC",
 ):
     """
     Create a Google Calendar event with meeting invites.
@@ -29,26 +46,24 @@ def create_meeting_invite(
         start_time (datetime): Meeting start time
         end_time (datetime): Meeting end time
         attendees (list[str]): List of participant emails
-        timezone (str): Timezone (default: UTC)
+        timezone_str (str): Timezone (default: UTC)
 
     Returns:
         dict: Created event metadata
     """
-    creds, _ = google.auth.default()  # loads from GOOGLE_APPLICATION_CREDENTIALS
-
     try:
-        service = build("calendar", "v3", credentials=creds)
+        service = get_calendar_service()
 
         event = {
             "summary": summary,
             "description": description,
             "start": {
                 "dateTime": start_time.isoformat(),
-                "timeZone": timezone,
+                "timeZone": timezone_str,
             },
             "end": {
                 "dateTime": end_time.isoformat(),
-                "timeZone": timezone,
+                "timeZone": timezone_str,
             },
             "attendees": [{"email": email} for email in attendees],
             "reminders": {
@@ -66,17 +81,21 @@ def create_meeting_invite(
             .execute()
         )
 
-        print(f"✅ Event created: {event_result.get('htmlLink')}")
+        logger.info(f"Event created successfully: {event_result.get('htmlLink')}")
         return event_result
 
     except HttpError as error:
-        print(f"❌ An error occurred: {error}")
+        logger.error(f"Google Calendar API error: {error}")
+        return None
+    except Exception as error:
+        logger.error(f"Unexpected error creating calendar event: {error}")
         return None
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     # Example usage
-    start = datetime.utcnow() + timedelta(days=1, hours=2)  # tomorrow +2h
+    start = datetime.now(timezone.utc) + timedelta(days=1, hours=2)  # tomorrow +2h
     end = start + timedelta(hours=1)
 
     create_meeting_invite(
@@ -85,5 +104,5 @@ if __name__ == "__main__":
         start_time=start,
         end_time=end,
         attendees=["user1@example.com", "user2@example.com"],
-        timezone="UTC",
+        timezone_str="UTC",
     )
