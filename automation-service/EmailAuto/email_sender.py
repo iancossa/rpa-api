@@ -110,6 +110,21 @@ def send_email(to: str, subject: str, body: str, attachments: list[str] = None, 
         return None
 
 
+def send_reminder(to: str, original_subject: str, reminder_body: str, days_ago: int = 3):
+    """Send a reminder email"""
+    subject = f"REMINDER: {original_subject}"
+    body = f"This is a reminder about: {original_subject}\n\nSent {days_ago} days ago.\n\n{reminder_body}"
+    
+    return send_email(to, subject, body)
+
+def forward_email(to: str, original_subject: str, original_body: str, original_sender: str, forward_note: str = ""):
+    """Forward an email"""
+    subject = f"Fwd: {original_subject}"
+    body = f"{forward_note}\n\n---------- Forwarded message ----------\nFrom: {original_sender}\nSubject: {original_subject}\n\n{original_body}"
+    
+    return send_email(to, subject, body)
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     # Example usage
