@@ -127,21 +127,30 @@ def organize_files(base_path, organize_by="extension"):
             logger.error("Base path not found: %s", base_path)
             return {"success": False, "error": "Base path not found"}
         
+        # Extension mapping rules
+        extension_map = {
+            '.pdf': 'archive/pdf',
+            '.xlsx': 'archive/excel', '.xls': 'archive/excel', '.xlsm': 'archive/excel',
+            '.jpg': 'archive/images', '.jpeg': 'archive/images', '.png': 'archive/images', 
+            '.gif': 'archive/images', '.bmp': 'archive/images', '.tiff': 'archive/images'
+        }
+        
         results = []
         
         for file_path in base_dir.iterdir():
             if file_path.is_file():
                 if organize_by == "extension":
-                    folder_name = file_path.suffix[1:] if file_path.suffix else "no_extension"
+                    ext = file_path.suffix.lower()
+                    folder_path = extension_map.get(ext, f'archive/other/{ext[1:] if ext else "no_extension"}')
                 elif organize_by == "date":
                     creation_time = datetime.fromtimestamp(file_path.stat().st_ctime)
-                    folder_name = creation_time.strftime("%Y-%m")
+                    folder_path = f"archive/{creation_time.strftime('%Y/%m')}"
                 else:
                     logger.error("Invalid organize_by option: %s", organize_by)
                     return {"success": False, "error": "Invalid organize_by option"}
                 
-                dest_folder = base_dir / folder_name
-                dest_folder.mkdir(exist_ok=True)
+                dest_folder = base_dir / folder_path
+                dest_folder.mkdir(parents=True, exist_ok=True)
                 dest_path = dest_folder / file_path.name
                 
                 shutil.move(str(file_path), str(dest_path))
