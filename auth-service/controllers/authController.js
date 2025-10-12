@@ -1,13 +1,26 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const sendVerificationEmail = require('../utils/emailSender');
-const generateEmailToken = require('../utils/generateEmail');
-const { notifyUserRegistration } = require('../utils/automationService');
+// Lazy loading for better performance
+let bcrypt, jwt, User, sendVerificationEmail, generateEmailToken, notifyUserRegistration;
+
+const loadDependencies = () => {
+  if (!bcrypt) {
+    bcrypt = require('bcrypt');
+    jwt = require('jsonwebtoken');
+    User = require('../models/User');
+    sendVerificationEmail = require('../utils/emailSender');
+    generateEmailToken = require('../utils/generateEmail');
+    ({ notifyUserRegistration } = require('../utils/automationService'));
+  }
+};
 
 exports.signup = async (req, res) => {
+  loadDependencies();
   try {
     const { username, email, password } = req.body;
+    
+    // Validate required fields
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'Username, email, and password are required' });
+    }
 
     // 1. Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -51,8 +64,14 @@ exports.signup = async (req, res) => {
 
 
 exports.login = async (req, res) => {
+  loadDependencies();
   try {
     const { email, password } = req.body;
+    
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
@@ -76,6 +95,7 @@ exports.login = async (req, res) => {
 };
 
 exports.verifyEmail = async (req, res) => {
+  loadDependencies();
   try {
     const { token } = req.query;
 
