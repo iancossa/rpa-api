@@ -1,4 +1,4 @@
-# RPA-API - Robotic Process Automation System
+ # RPA-API - Robotic Process Automation System
 
 A comprehensive microservices-based RPA (Robotic Process Automation) system built with Node.js, Python, and MongoDB. The system provides task management, user authentication, automation execution, and real-time notifications through message queues.
 
@@ -62,9 +62,25 @@ The system follows a microservices architecture with the following services:
 - **Purpose**: RPA automation execution
 - **Technology**: Python, FastAPI
 - **Features**:
-  - Automation script execution
-  - Process automation workflows
-  - Integration with task management
+  - **Email Automation**:
+    - Send emails with attachments (PDF, Excel, images)
+    - Parse incoming emails for structured data extraction
+    - Send automated reminders and forward emails
+    - Gmail API integration with OAuth2
+  - **Calendar Integration**:
+    - Create meeting invites via Google Calendar API
+    - Schedule automated meetings with attendees
+    - Timezone-aware event creation
+  - **File Operations**:
+    - Move, copy, rename, delete files
+    - Organize files by extension (PDF→archive/pdf, Excel→archive/excel, Images→archive/images)
+    - Organize files by creation date (archive/YYYY/MM structure)
+    - JSON-based task processing for RabbitMQ integration
+    - File system monitoring and automated processing
+  - **RabbitMQ Consumer**:
+    - Process automation tasks from message queue
+    - Handle file operations, email tasks, calendar events
+    - Error handling and task acknowledgment
 
 ### 5. Notification Service
 - **Purpose**: Real-time notifications and messaging
@@ -165,6 +181,9 @@ RABBITMQ_URL=amqp://localhost
 #### Automation Service (.env)
 ```env
 PORT=5003
+GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account.json
+EMAIL_SECRET=your_email_verification_secret
+RABBITMQ_URL=amqp://localhost
 ```
 
 ### 4. Database Setup
@@ -228,29 +247,42 @@ docker-compose down
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/auth/register` | User registration | No |
-| POST | `/auth/login` | User login | No |
-| POST | `/auth/verify-email` | Email verification | No |
-| POST | `/auth/forgot-password` | Password reset | No |
-| GET | `/admin/users` | Get all users | Admin |
+| POST | `/auth/register` | User registration with email verification | No |
+| POST | `/auth/login` | User login with JWT token | No |
+| GET | `/auth/verify-email` | Email verification via token | No |
+| POST | `/auth/forgot-password` | Password reset functionality | No |
+| GET | `/admin/users` | Get all users (Admin only) | Admin |
+| POST | `/admin/users` | Create user (Admin only) | Admin |
 
 ### Task Service Endpoints
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/tasks` | Create task | Admin/Manager |
-| GET | `/tasks` | Get all tasks | Any |
+| POST | `/tasks` | Create task with assignment | Admin/Manager |
+| GET | `/tasks` | Get all tasks with filtering | Any |
 | GET | `/tasks/:id` | Get task by ID | Any |
-| GET | `/tasks/my-tasks` | Get user's tasks | JWT |
+| GET | `/tasks/my-tasks` | Get user's assigned tasks | JWT |
 | PUT | `/tasks/:id/status` | Update task status | JWT (own tasks) |
+| DELETE | `/tasks/:id` | Delete task | Admin/Manager |
+| POST | `/tasks/:id/assign` | Assign task to user | Admin/Manager |
+
+### Automation Service Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/automation/run-task` | Trigger automation task | JWT |
+| POST | `/api/automation/user-registered` | Handle user registration automation | Internal |
+| POST | `/run-task` | Execute specific automation task | Internal |
+| GET | `/` | Health check | No |
 
 ### User Service Endpoints
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | GET | `/users/profile` | Get user profile | JWT |
-| PUT | `/users/profile` | Update profile | JWT |
+| PUT | `/users/profile` | Update user profile | JWT |
 | POST | `/users/upload` | Upload profile picture | JWT |
+| DELETE | `/users/profile` | Delete user account | JWT |
 
 ## 🔐 Authentication & Authorization
 
@@ -377,13 +409,67 @@ Content-Type: application/json
 ```bash
 POST http://localhost:5002/tasks
 Content-Type: application/json
+Authorization: Bearer <jwt_token>
 user-role: admin
 
 {
-  "title": "Test Task",
-  "description": "Task description",
+  "title": "Process Invoice",
+  "description": "Extract data from invoice email and organize files",
   "assignedTo": "testuser"
 }
+```
+
+#### 4. Trigger Automation Task
+```bash
+POST http://localhost:5003/api/automation/run-task
+Content-Type: application/json
+Authorization: Bearer <jwt_token>
+
+{
+  "userId": "user123",
+  "taskType": "email_processing"
+}
+```
+
+#### 5. File Operation via JSON
+```bash
+# Create task file: tasks/file_task.json
+{
+  "action": "move",
+  "source": "/uploads/invoice1.pdf",
+  "destination": "/archive/2025/01/"
+}
+```
+
+#### 6. Email Automation Example
+```python
+# Send automated email with attachments
+from EmailAuto.email_sender import send_email
+
+send_email(
+    to="client@example.com",
+    subject="Invoice Processed",
+    body="Your invoice has been processed successfully.",
+    attachments=["reports/invoice_summary.pdf"]
+)
+```
+
+#### 7. Calendar Integration Example
+```python
+# Create automated meeting
+from EmailAuto.calendar import create_meeting_invite
+from datetime import datetime, timedelta, timezone
+
+start_time = datetime.now(timezone.utc) + timedelta(days=1)
+end_time = start_time + timedelta(hours=1)
+
+create_meeting_invite(
+    summary="Invoice Review Meeting",
+    description="Review processed invoices",
+    start_time=start_time,
+    end_time=end_time,
+    attendees=["manager@example.com", "client@example.com"]
+)
 ```
 
 ## 🔧 Configuration
@@ -398,6 +484,8 @@ user-role: admin
 | `RABBITMQ_URL` | RabbitMQ connection | amqp://localhost |
 | `EMAIL_USER` | SMTP email | Required |
 | `EMAIL_PASS` | SMTP password | Required |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Google API credentials | Required |
+| `EMAIL_SECRET` | Email verification secret | Required |
 
 ### Docker Configuration
 
@@ -490,18 +578,41 @@ For support and questions:
 
 ## 📈 Roadmap
 
+### Completed Features
+- [x] Microservices architecture with 6 services
+- [x] JWT-based authentication with email verification
+- [x] Role-based access control (Admin, Manager, User)
+- [x] Task management with real-time notifications
+- [x] Email automation with Gmail API integration
+- [x] Calendar integration with Google Calendar API
+- [x] File operations automation (move, copy, rename, delete, organize)
+- [x] RabbitMQ message queue system
+- [x] Centralized logging service
+- [x] Docker containerization
+- [x] Comprehensive error handling and validation
+- [x] File organization by extension and date
+- [x] Email parsing for structured data extraction
+- [x] Automated reminders and email forwarding
+
 ### Upcoming Features
 - [ ] Web dashboard for task management
-- [ ] Advanced automation workflows
+- [ ] Advanced workflow builder UI
 - [ ] Real-time WebSocket notifications
-- [ ] API rate limiting
-- [ ] Comprehensive test suite
-- [ ] Performance monitoring
-- [ ] Kubernetes deployment
-- [ ] CI/CD pipeline integration
+- [ ] API rate limiting and throttling
+- [ ] Comprehensive test suite with unit/integration tests
+- [ ] Performance monitoring and metrics
+- [ ] Kubernetes deployment manifests
+- [ ] CI/CD pipeline with GitHub Actions
+- [ ] OCR integration for document processing
+- [ ] Machine learning for intelligent task routing
 
 ### Version History
 - **v1.0.0** - Initial release with core microservices
 - **v1.1.0** - Added message queue system
 - **v1.2.0** - Implemented centralized logging
 - **v1.3.0** - Enhanced authentication and authorization
+- **v1.4.0** - Added email automation with Gmail API
+- **v1.5.0** - Implemented calendar integration
+- **v1.6.0** - Added comprehensive file operations
+- **v1.7.0** - Enhanced error handling and security fixes
+- **v1.8.0** - Added email parsing and structured data extraction
