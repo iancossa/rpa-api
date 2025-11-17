@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install:backend": "cd backend && npm run install:all",
+    "start:backend": "cd backend && docker-compose up",
+    "start:backend:dev": "cd backend && docker-compose up --build",
+    "stop:backend": "cd backend && docker-compose down"
   },
   "repository": {
     "type": "git",

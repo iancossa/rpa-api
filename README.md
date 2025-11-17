@@ -123,25 +123,35 @@ cd rpa-api
 npm install
 ```
 
-#### Service-specific Dependencies
+#### Backend Dependencies (All Services)
+```bash
+# Install all backend services at once
+npm run install:backend
+
+# Or install individually
+cd backend
+npm run install:all
+```
+
+#### Manual Service Installation (if needed)
 ```bash
 # Auth Service
-cd auth-service && npm install && cd ..
+cd backend/auth-service && npm install && cd ../..
 
 # User Service
-cd user-service && npm install && cd ..
+cd backend/user-service && npm install && cd ../..
 
 # Task Service
-cd task-service && npm install && cd ..
+cd backend/task-service && npm install && cd ../..
 
 # Notification Service
-cd notification-service && npm install && cd ..
+cd backend/notification-service && npm install && cd ../..
 
 # Log Service
-cd log-service && npm install && cd ..
+cd backend/log-service && npm install && cd ../..
 
 # Automation Service (Python)
-cd automation-service && pip install -r requirements.txt && cd ..
+cd backend/automation-service && pip install -r requirements.txt && cd ../..
 ```
 
 ### 3. Environment Configuration
@@ -206,39 +216,54 @@ RABBITMQ_URL=amqp://localhost
 
 ## 🚀 Running the Services
 
-### Development Mode (Individual Services)
+### Development Mode
 
+#### All Services at Once
+```bash
+# From root directory
+npm run start:backend:dev
+
+# Or from backend directory
+cd backend && npm run start:all
+```
+
+#### Individual Services
 ```bash
 # Auth Service
-cd auth-service && npm start
+cd backend/auth-service && npm start
 
 # User Service
-cd user-service && npm start
+cd backend/user-service && npm start
 
 # Task Service
-cd task-service && npm start
+cd backend/task-service && npm start
 
 # Notification Service
-cd notification-service && npm start
+cd backend/notification-service && npm start
 
 # Log Service
-cd log-service && npm start
+cd backend/log-service && npm start
 
 # Automation Service
-cd automation-service && python main.py
+cd backend/automation-service && python main.py
 ```
 
 ### Docker Deployment
 
 ```bash
-# Build and run all services
+# From root directory
+npm run start:backend
+
+# Or from backend directory
+cd backend
 docker-compose up --build
 
 # Run in background
 docker-compose up -d
 
 # Stop services
-docker-compose down
+npm run stop:backend
+# Or: cd backend && docker-compose down
 ```
 
 ## 📚 API Documentation

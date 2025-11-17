@@ -1,0 +1,27 @@
+{
+  "name": "rpa-api-backend",
+  "version": "1.0.0",
+  "description": "RPA API Backend Microservices",
+  "scripts": {
+    "install:all": "npm run install:auth && npm run install:user && npm run install:task && npm run install:notification && npm run install:log && npm run install:automation",
+    "install:auth": "cd auth-service && npm install",
+    "install:user": "cd user-service && npm install",
+    "install:task": "cd task-service && npm install",
+    "install:notification": "cd notification-service && npm install",
+    "install:log": "cd log-service && npm install",
+    "install:automation": "cd automation-service && pip install -r requirements.txt",
+    "start:all": "concurrently \"npm run start:auth\" \"npm run start:user\" \"npm run start:task\" \"npm run start:notification\" \"npm run start:log\" \"npm run start:automation\"",
+    "start:auth": "cd auth-service && npm start",
+    "start:user": "cd user-service && npm start",
+    "start:task": "cd task-service && npm start",
+    "start:notification": "cd notification-service && npm start",
+    "start:log": "cd log-service && npm start",
+    "start:automation": "cd automation-service && python main.py",
+    "docker:up": "docker-compose up",
+    "docker:up:build": "docker-compose up --build",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
